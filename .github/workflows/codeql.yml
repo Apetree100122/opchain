@@ -1,5 +1,4 @@
 name: "CodeQL Advanced"
-
 on:
   push:
     branches: [ "main" ]
@@ -7,12 +6,10 @@ on:
     branches: [ "main" ]
   schedule:
     - cron: '31 3 * * 4'
-
 jobs:
   analyze:
-    name: Analyze (${{ matrix.language }})
-
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    name: Analyze ${{matrix.language}}
+    runs-on: ubuntu-latest
     permissions:
       security-events: read
       packages: read
@@ -22,8 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - language: (${{ matrix.language }})
-          build-mode: manuaL
+        - language: ${{matrix.language}}
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -35,13 +31,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
