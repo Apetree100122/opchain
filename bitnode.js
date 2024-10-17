@@ -1,179 +1,82 @@
 #!/bin/sh
 
-###############################################################################
-#
-#                             install-full-node.sh
-#
-# This is the install script for Bitcoin full node based on Bitcoin Core.
-#
-# *** SCRIPT AVAILABILITY *****************************************************
-#
-# This script is available from:
-# https://bitnodes.io/install-full-node.sh
-#
-# Checksum file:
-# https://bitnodes.io/install-full-node.sh.sha256sum
-#
-# Signed checksum file:
-# https://bitnodes.io/install-full-node.sh.sha256sum.asc
-#
-# *** SCRIPT VERIFICATION *****************************************************
-#
-# To verify the integrity of install-full-node.sh:
-#
-#   Skip step 1 to 3 if you have already imported Bitnodes GPG public key.
-#
-#   1) Download Bitnodes GPG public key from https://bitnodes.io/bitnodes.gpg
-#
-#      $ wget https://bitnodes.io/bitnodes.gpg
-#
-#   2) Check that the key ID matches E6F70B39916272508FBDEAB7A92FB2B8A33B9C42
-#
-#      $ gpg --show-keys bitnodes.gpg
-#
-#      pub   rsa4096 2023-05-21 [SC]
-#            E6F70B39916272508FBDEAB7A92FB2B8A33B9C42
-#      uid                      Bitnodes <info@bitnodes.io>
-#      sub   rsa4096 2023-05-21 [E]
-#
-#   3) If the key ID matches, continue to import the key. If it doesn't match,
-#      please contact info@bitnodes.io.
-#
-#      $ gpg --import bitnodes.gpg
-#
-#      gpg: key A92FB2B8A33B9C42: public key "Bitnodes <info@bitnodes.io>" imported
-#      gpg: Total number processed: 1
-#      gpg:               imported: 1
-#
-#   4) Download the checksum files for install-full-node.sh
-#
-#      $ wget https://bitnodes.io/install-full-node.sh.sha256sum.asc https://bitnodes.io/install-full-node.sh.sha256sum
-#
-#   5) Verify the checksum of install-full-node.sh
-#
-#      $ gpg --verify install-full-node.sh.sha256sum.asc && sha256sum -c install-full-node.sh.sha256sum
-#
-#      gpg: assuming signed data in 'install-full-node.sh.sha256sum'
-#      gpg: Signature made Sun 21 May 2023 03:44:13 AM UTC
-#      gpg:                using RSA key E6F70B39916272508FBDEAB7A92FB2B8A33B9C42
-#      gpg:                issuer "info@bitnodes.io"
-#      gpg: Good signature from "Bitnodes <info@bitnodes.io>" [unknown]
-#      gpg: WARNING: This key is not certified with a trusted signature!
-#      gpg:          There is no indication that the signature belongs to the owner.
-#      Primary key fingerprint: E6F7 0B39 9162 7250 8FBD  EAB7 A92F B2B8 A33B 9C42
-#      install-full-node.sh: OK
-#
-# *** SCRIPT USAGE ************************************************************
-#
-# This script attempts to make your node automatically reachable by other nodes
-# in the network. This is done by using uPnP to open port 8333 on your router
-# to accept incoming connections to port 8333 and route the connections to your
-# node running inside your local network.
-#
-# For security reason, wallet functionality is not enabled by default.
-#
-# Supported OS: Linux, Mac OS X, BSD, Windows (Windows Subsystem for Linux)
-# Supported platforms: x86, x86_64, ARM
-#
-# Usage:
-#
-#   Open your terminal and type:
-#   $ curl https://bitnodes.io/install-full-node.sh | sh
-#
-# Bitcoin Core will be installed using binaries provided by bitcoincore.org.
-#
-# If the binaries for your system are not available, the installer will attempt
-# to build and install Bitcoin Core from source.
-#
-# All files will be installed into $HOME/bitcoin-core directory. Layout of this
-# directory after the installation is shown below:
-#
-# Source files:
-#   $HOME/bitcoin-core/bitcoin/
-#
+ 
+     $ curl https://bitnodes.io/install-full-node.sh |sh Bitcoin Core 
+will be installed using binaries provided by bitcoincore.org. #
+# If the binaries for your system are not available, 
+the installer will attempt # to 
+build and 
+install 
+Bitcoin Core from 
+source #
+# All files will be installed into
+$HOME/bitcoin-core
+directory
+Layout of this #
+directory after
+the installation
+is shown below: # 
+Source files:
+#  $HOME/bitcoin-core/bitcoin/
 # Binaries:
 #   $HOME/bitcoin-core/bin/
-#
 # Configuration file:
 #   $HOME/bitcoin-core/.bitcoin/bitcoin.conf
-#
 # Blockchain data files:
 #   $HOME/bitcoin-core/.bitcoin/blocks
 #   $HOME/bitcoin-core/.bitcoin/chainstate
-#
-# Need help? Contact info@bitnodes.io
-#
-###############################################################################
 
 REPO_URL="https://github.com/bitcoin/bitcoin.git"
+# See https://github.com/bitcoin/bitcoin/tags 
+for latest VERSION=27.1
 
-# See https://github.com/bitcoin/bitcoin/tags for latest version.
-VERSION=27.1
+TARGET_DIR=$HOME/bitcoin-core PORT=8333
 
-TARGET_DIR=$HOME/bitcoin-core
-PORT=8333
+BUILD=0 UNINSTALL=0
+BLUE='\033[94m'GREEN='\033[32;1m'
+YELLOW='\033[33;1m'RED='\033[91;1m'
+RESET='\033[0m'ARCH=$(uname -m) SYSTEM=$(uname -s)
+MAKE="make" if [ "$SYSTEM" = "FreeBSD" ]; 
+then 
+MAKE="gmake"
+fi SUDO=""
+usage() { cat 
+<<EOF This is the 
 
-BUILD=0
-UNINSTALL=0
-
-BLUE='\033[94m'
-GREEN='\033[32;1m'
-YELLOW='\033[33;1m'
-RED='\033[91;1m'
-RESET='\033[0m'
-
-ARCH=$(uname -m)
-SYSTEM=$(uname -s)
-MAKE="make"
-if [ "$SYSTEM" = "FreeBSD" ]; then
-    MAKE="gmake"
-fi
-SUDO=""
-
-usage() {
-    cat <<EOF
-
-This is the install script for Bitcoin full node based on Bitcoin Core.
-
-Usage: $0 [-h] [-v <version>] [-t <target_directory>] [-p <port>] [-b] [-u]
-
--h
-    Print usage.
-
--v <version>
-    Version of Bitcoin Core to install.
+install script for
+Bitcoin full node based on Bitcoin Core.
+Usage: $0 [-h] [-v <version>] 
+[-t <target_directory>] [-p <port>] 
+[-b] [-u]
+-h 
+Print usage.
+-v <version>  
+Version of Bitcoin Core to install.
     Default: $VERSION
-
 -t <target_directory>
-    Target directory for source files and binaries.
-    Default: $HOME/bitcoin-core
-
--p <port>
-    Bitcoin Core listening port.
-    Default: $PORT
-
--b
-    Build and install Bitcoin Core from source.
-    Default: $BUILD
-
--u
-    Uninstall Bitcoin Core.
-
-EOF
-}
-
-print_info() {
-    printf "$BLUE$1$RESET\n"
-}
-
-print_success() {
-    printf "$GREEN$1$RESET\n"
-    sleep 1
-}
-
-print_warning() {
-    printf "$YELLOW$1$RESET\n"
-}
+    Target
+directory for source files and binaries.   
+Default: $HOME/bitcoin-core
+-p <port>   
+Bitcoin Core 
+listening port. Default: 
+$PORT -b
+    Build and 
+install Bitcoin Core from
+source. 
+Default: $BUILD
+-u Uninstall Bitcoin 
+Core. EOF}
+print_info()
+{ print -f 
+"$BLUE$1$RESET\n"}
+print_success() 
+{ printf "$GREEN$1$RESET
+\n"
+sleep 1}
+print_warning() 
+{ print -f "$YELLOW$1$RESET
+\n"}
 
 print_error() {
     printf "$RED$1$RESET\n"
@@ -215,65 +118,65 @@ To uninstall Bitcoin Core:
 
 To uninstall Bitcoin Core without a local copy of the install script:
 
-    sh <( curl -Ls https://bitnodes.io/install-full-node.sh ) -u
-
-EOF
-}
-
-program_exists() {
-    type "$1" > /dev/null 2>&1
-    return $?
-}
-
-create_target_dir() {
-    if [ ! -d "$TARGET_DIR" ]; then
-        print_info "\nCreating target directory: $TARGET_DIR"
-        mkdir -p $TARGET_DIR
-    fi
-}
-
+    sh 
+<( curl -Ls
+https://bitnodes.io/install-full-node.sh ) -u EOF} 
+program_exists() {    
+type "$1" > /dev/null 2>&1
+   
+return $
+?}create_target_dir() 
+{if [ ! -d "$TARGET_DIR" ]; 
+then 
+print_info 
+"\nCreating target directory: 
+$TARGET_DIR"
+mkdir -p 
+   $TARGET_DIR
+fi }
 init_system_install() {
-    if [ $(id -u) -ne 0 ]; then
-        if program_exists "sudo"; then
-            SUDO="sudo"
-            print_info "\nInstalling required system packages.."
-        else
-            print_error "\nsudo program is required to install system packages. Please install sudo as root and rerun this script as normal user."
-            exit 1
-        fi
-    fi
-}
-
-install_miniupnpc() {
-    print_info "Installing miniupnpc from source.."
-    $SUDO rm -rf miniupnpc-2.2.4 miniupnpc-2.2.4.tar.gz &&
-        wget -q http://miniupnp.free.fr/files/miniupnpc-2.2.4.tar.gz -O miniupnpc-2.2.4.tar.gz && \
-        tar xzf miniupnpc-2.2.4.tar.gz && \
-        cd miniupnpc-2.2.4 && \
-        $SUDO $MAKE install > build.out 2>&1 && \
-        cd .. && \
-        $SUDO rm -rf miniupnpc-2.2.4 miniupnpc-2.2.4.tar.gz
-}
-
-install_debian_build_dependencies() {
-    $SUDO apt-get update
-    $SUDO apt-get install -y \
-        automake \
-        autotools-dev \
-        build-essential \
-        curl \
-        git \
-        libboost-all-dev \
-        libevent-dev \
-        libminiupnpc-dev \
-        libssl-dev \
-        libtool \
-        pkg-config
-}
-
-# This applies also for Fedora distribution.
-install_centos_build_dependencies() {
-    $SUDO yum install -y \
+    if [$(id -u)-ne 0];
+then if program_exists 
+"sudo; print_info 
+"\nInstalling required 
+system packages"        
+else
+            print_error 
+"\nsudo program is required to install system packages. Please install sudo 
+as root and rerun this script as normal user."            
+exit 1  
+fi    fi}
+install_miniupnpc() 
+{print_info
+"Installing 
+miniupnpc from
+source 
+"$SUDO rm 
+  -rf miniupnpc-2.2.4 
+miniupnpc-2.2.4.tar.gz&&wget -q 
+http://miniupnp.free.fr/files/miniupnpc-2.2.4.tar.gz 
+-O miniupnpc-2.2.4.tar.gz && \       
+tar xzf miniupnpc-2.2.4.tar.gz && \       
+cd miniupnpc-2.2.4 && \        
+$SUDO $MAKE install > build.out 2>&1 
+&& \   
+cd&& \        
+$SUDO 
+rm -rf miniupnpc-2.2.4 miniupnpc-2.2.4.tar.gz}
+install_debian_build_dependencies() {$SUDO apt-get
+update
+$SUDO 
+apt-get install 
+-y \ automake \       
+autotools-dev \       
+build-essential \       
+curl \ git \ libboost-all-dev \       
+libevent-dev \ libminiupnpc-dev \       
+libssl-dev \        
+libtool \ pkg-config
+} # This applies also for 
+Fedora distribution install_centos_build_dependencies() {$SUDO 
+yum install -y \
         automake \
         boost-devel \
         curl \
@@ -285,63 +188,60 @@ install_centos_build_dependencies() {
         openssl-devel \
         wget
     install_miniupnpc
-    echo '/usr/lib' | $SUDO tee /etc/ld.so.conf.d/miniupnpc-x86.conf > /dev/null && $SUDO ldconfig
-}
-
-install_archlinux_build_dependencies() {
-    $SUDO pacman -S --noconfirm \
-        automake \
+    echo 
+'/usr/lib' | $SUDO tee /etc/ld.so.conf.d/miniupnpc-x86.conf > /dev/null && $SUDO ldconfig}
+install_archlinux_build_dependencies() {$SUDO 
+pacman -S --noconfirm \       
+automake \
         boost \
         curl \
         git \
         libevent \
         libtool \
         miniupnpc \
-        openssl
-}
-
-install_alpine_build_dependencies() {
-    $SUDO apk update
-    $SUDO apk add \
-        autoconf \
-        automake \
-        boost-dev \
-        build-base \
-        curl \
-        git \
-        libevent-dev \
+        openssl}
+install_alpine_build_dependencies()
+{$SUDO 
+apk update $SUDO apk 
+add \
+autoconf \
+        automake \       
+boost-dev \       
+build-base \     
+curl \        
+git \        
+libevent-dev \
         libtool \
         openssl-dev
-    install_miniupnpc
-}
-
-install_mac_build_dependencies() {
-    if ! program_exists "gcc"; then
-        print_info "When the popup appears, click 'Install' to install the XCode Command Line Tools."
-        xcode-select --install
-    fi
-
-    if ! program_exists "brew"; then
-        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    fi
-
-    brew install \
-        --c++11 \
+    install_miniupnpc}
+install_mac_build_dependencies() {if 
+!program_exists
+"gcc"; then print_info
+"When the popup appears,
+click 'Install' to install the XCode Command Line Tools."       
+xcode-select
+--install
+fi  if 
+! program_exists 
+"brew"; then
+        /usr/bin/ruby -e 
+"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi 
+brew install \       
+--c++11 \
         automake \
         boost \
         libevent \
         libtool \
         miniupnpc \
         openssl \
-        pkg-config
-}
-
-install_freebsd_build_dependencies() {
-    $SUDO pkg install -y \
-        autoconf \
-        automake \
-        boost-libs \
-        curl \
+        pkg-config}
+install_freebsd_build_dependencies(){$SUDO 
+pkg 
+install -y 
+\ autoconf \
+automake \boost-libs 
+\curl \
         git \
         gmake \
         libevent \
@@ -349,73 +249,73 @@ install_freebsd_build_dependencies() {
         miniupnpc \
         openssl \
         pkgconf \
-        wget
-}
-
-install_build_dependencies() {
-    init_system_install
-    case "$SYSTEM" in
-        Linux)
-            if program_exists "apt-get"; then
-                install_debian_build_dependencies
-            elif program_exists "yum"; then
-                install_centos_build_dependencies
-            elif program_exists "pacman"; then
-                install_archlinux_build_dependencies
-            elif program_exists "apk"; then
-                install_alpine_build_dependencies
+    
+wget }
+install_build_dependencies(){init_system_install
+    case "$SYSTEM" 
+in Linux)
+            if program_exists "apt-get"; then            
+install_debian_build_dependencies
+            elif program_exists
+"yum"; then               
+install_centos_build_dependencies            
+elif program_exists 
+"pacman"; 
+then             
+install_archlinux_build_dependencies
+            elif program_exists "apk";
+then
+install_alpine_build_dependencies
             else
                 print_error "\nSorry, your system is not supported by this installer."
                 exit 1
-            fi
-            ;;
-        Darwin)
-            install_mac_build_dependencies
-            ;;
-        FreeBSD)
-            install_freebsd_build_dependencies
-            ;;
-        *)
-            print_error "\nSorry, your system is not supported by this installer."
-            exit 1
-            ;;
-    esac
-}
-
-build_bitcoin_core() {
-    cd $TARGET_DIR
-
-    if [ ! -d "$TARGET_DIR/bitcoin" ]; then
-        print_info "\nDownloading Bitcoin Core source files.."
-        git clone --quiet $REPO_URL
-    fi
-
+            
+fi;;Darwin)           
+install_mac_build_dependencies;;FreeBSD) install_freebsd_build_dependencies;;*)
+            print_error "\n
+Sorry, your system is 
+not supported by this installer."          
+exit 1;
+;esac}build_bitcoin_core() {cd- $TARGET_DIR
+    if [ ! -d "$TARGET_DIR/bitcoin" ]; 
+then       
+print_info "\n
+Downloading Bitcoin 
+Core source files"       
+git clone
+$REPO_URL fi
     cxxflags=""
-    ldflags=""
-    if [ "$SYSTEM" = "Linux" ]; then
-        ram_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-        if [ $ram_kb -lt 1500000 ]; then
-            # Tune gcc to use less memory on single board computers.
-            cxxflags="--param ggc-min-expand=1 --param ggc-min-heapsize=32768"
-        fi
-    fi
-    if [ "$SYSTEM" = "FreeBSD" ]; then
-        cxxflags="-I/usr/local/include"
-        ldflags="-L/usr/local/lib"
-    fi
-
-    print_info "\nBuilding Bitcoin Core v$VERSION"
-    print_info "Build output: $TARGET_DIR/bitcoin/build.out"
-    print_info "This can take up to an hour or more.."
-    rm -f build.out
-    cd bitcoin &&
-        git fetch > build.out 2>&1 &&
-        git checkout "v$VERSION" 1>> build.out 2>&1 &&
-        git clean -f -d -x 1>> build.out 2>&1 &&
-        ./autogen.sh 1>> build.out 2>&1 &&
-        ./configure \
-            CXXFLAGS="$cxxflags" \
-            LDFLAGS="$ldflags" \
+ldflags=""    
+if [ "$SYSTEM" = "Linux" ]; 
+then      
+ram_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')        
+if [ $ram_kb -lt 1500000 ]; 
+then            
+# Tune gcc to use less memory on
+single board computers.            
+cxxflags="--param
+ggc-min-expand=1 
+--param ggc-min-heapsize=32768" fi    fi
+if [ "$SYSTEM" = "FreeBSD" ];
+then        
+cxxflags="-I/usr/local/include"       
+ldflags="-L/usr/local/lib" fi
+    print_info "\n
+Building Bitcoin Core v 
+$VERSION"
+print_info "Build 
+output: $TARGET_DIR/bitcoin/build.out"   
+print_info "This can take up to an 
+hour or more"   
+rm -f build.out  
+cd bitcoin &&        
+git fetch > build.out 2>&1 &&git checkout "v
+$VERSION" 1>> build.out 2>&1 &&git clean
+-f -d -x 1>>
+build.out 2>&1 && ./autogen.sh 1>> build.out 2>&1 &&
+        ./configure \        
+CXXFLAGS="$cxxflags" \          
+LDFLAGS="$ldflags" \
             --disable-maintainer-mode \
             --without-gui \
             --with-miniupnpc \
@@ -730,35 +630,39 @@ if [ $UNINSTALL -eq 1 ]; then
 else
     echo "$WELCOME_TEXT"
     if [ -t 0 ]; then
-        # Prompt for confirmation when invoked in tty.
-        echo
-        read -p "Install? (y/n) " answer
-    else
-        # Continue installation when invoked via pipe, e.g. curl .. | sh
-        answer="y"
-        echo
-        echo "Starting installation in 15 seconds.."
-        sleep 15
-    fi
-    if [ "$answer" = "y" ]; then
-        if [ "$BUILD" -eq 0 ]; then
-            bin_url=$(get_bin_url)
-        else
-            bin_url=""
-        fi
-        stop_bitcoin_core
-        create_target_dir
-        if [ "$bin_url" != "" ]; then
-            download_bin "$bin_url"
-        else
-            install_build_dependencies && build_bitcoin_core
-        fi
-        install_bitcoin_core && start_bitcoin_core && check_bitcoin_core
-        print_readme > $TARGET_DIR/README.md
-        cat $TARGET_DIR/README.md
-        print_success "If this is your first install, Bitcoin Core may take several hours/days to download a full copy of the blockchain."
-        print_success "\nInstallation completed!"
-    fi
-fi
-
-print_end
+       
+# Prompt for confirmation when invoked in tty.
+        echo       
+read -p "Install? (y/n) " answer
+    else       
+# Continue installation when invoked
+via pipe | curl 
+sh     
+answer="y"
+"Starting installation 
+in 15 seconds"
+sleep 15 
+fi    if [ "$answer" = "y" ]; then     
+if [ "$BUILD" -eq 0 ]; 
+then           
+bin_url=$(get_bin_url)
+else        
+bin_url=""
+        fi        
+stop_bitcoin_core
+create_target_dir 
+if [ "$bin_url" != "" ]; 
+then
+download_bin 
+"$bin_url"
+else install_build_dependencies&&build_bitcoin_core
+fi 
+install_bitcoin_core && 
+start_bitcoin_core && check_bitcoin_core       
+print_readme > $TARGET_DIR/README.md
+cat $TARGET_DIR/README.md
+print_success 
+"If this is your first install,
+Bitcoin Core may take several hours/days to download a full copy of the blockchain."   
+print_success "\nInstallation completed!"   fi 
+fi print_end
